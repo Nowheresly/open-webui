@@ -21,6 +21,7 @@ from langchain_community.document_loaders import (
 )
 from langchain_core.documents import Document
 from open_webui.env import SRC_LOG_LEVELS, GLOBAL_LOG_LEVEL
+from open_webui.retrieval.loaders import DoclingLoader
 
 logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -170,6 +171,21 @@ class Loader:
                 api_endpoint=self.kwargs.get("DOCUMENT_INTELLIGENCE_ENDPOINT"),
                 api_key=self.kwargs.get("DOCUMENT_INTELLIGENCE_KEY"),
             )
+        elif (
+            self.engine == "docling"
+            and (
+                    file_ext in ["pdf", "xls", "xlsx", "docx", "ppt", "pptx"]
+                    or file_content_type
+                    in [
+                        "application/vnd.ms-excel",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "application/vnd.ms-powerpoint",
+                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    ]
+            )
+        ):
+            loader = DoclingLoader(file_path=file_path)
         else:
             if file_ext == "pdf":
                 loader = PyPDFLoader(
